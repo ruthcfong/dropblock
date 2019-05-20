@@ -40,7 +40,8 @@ class DropBlock2D(nn.Module):
             return x
         else:
             # get gamma value
-            gamma = self._compute_gamma(x)
+	    assert x.shape[2] == x.shape[3]
+            gamma = self._compute_gamma(x, x.shape[2])
 
             # sample mask
             mask = (torch.rand(x.shape[0], *x.shape[2:]) < gamma).float()
@@ -72,8 +73,8 @@ class DropBlock2D(nn.Module):
 
         return block_mask
 
-    def _compute_gamma(self, x):
-        return self.drop_prob / (self.block_size ** 2)
+    def _compute_gamma(self, x, feat_size):
+        return (self.drop_prob / (self.block_size ** 2)) * (feat_size**2 / (feat_size ** 2 - self.block_size ** 2 + 1))
 
 
 class DropBlock3D(DropBlock2D):
